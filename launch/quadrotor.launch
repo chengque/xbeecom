@@ -1,0 +1,5 @@
+<launch>
+  <node pkg="xbee_com" type="xbee_com" name="xbee_com"/>
+  <node name="showstate" pkg="xbee_com" type="showstate.py" />
+  <node name="record" pkg="rosbag" type="record" args="record -O /home/chengque/rec.bag -a "/>
+</launch>
