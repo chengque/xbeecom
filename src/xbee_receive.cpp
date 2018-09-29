@@ -1,12 +1,11 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
- #include <std_msgs/Float32MultiArray.h> 
+ #include <geometry_msgs/PoseStamped.h> 
 #include <sstream>
 #include "sys/time.h"
 #include <math.h>
 #include <stdio.h>
 #include "ftditools.h"
-
 
 
 double getTime()
@@ -20,16 +19,14 @@ double getTime()
 
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "talker");
+	ros::init(argc, argv, "xbee receiver");
 	ros::NodeHandle n;
-	ros::Publisher chatter_pub = n.advertise<std_msgs::Float32MultiArray>("chatter", 1000);
+	ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("/mocap/pose", 10);
 	ros::Rate loop_rate(50);
-	short data_out[10],data_send[4];
+	short data_out[11];
+	int secs[2];
 	int data_new_flag=0;
-	int count = 0;
-	double HL_Status[2];
-	std_msgs::Float32MultiArray msg;
-	msg.data.resize(5);
+	geometry_msgs::PoseStamped msg;
 	double ltime,ntime;
 	ltime=getTime();
 	ntime=ltime;
@@ -40,7 +37,8 @@ int main(int argc, char **argv) {
 	msg.layout.dim[1].size=1;
 	msg.layout.dim[2].size=1;
 	*/
-	openFtdi = open_ftdi(57200, "Quad_USB1", 5, 15);
+	openFtdi = open_ftdi(57600, "Aero0", 5, 15);
+	ROS_INFO("Open Ftdi: [%d]", openFtdi);
 	while (ros::ok()) {
 		ntime=getTime();
 		ltime=ntime;
@@ -52,12 +50,24 @@ int main(int argc, char **argv) {
 		{
 			msg.data[i]=data_out[i]/512.0f;
 		}*/
+		if(openFtdi<1)
+		{
+			openFtdi = open_ftdi(57600, "Quad_USB1", 5, 15);
+		}
 		data_new_flag = read_ftdi (data_out);
-		send_ftdi (data_send);
-		chatter_pub.publish(msg);
+		memcpy(secs,&data_out[7],sizeof(secs));
+		msg.pose.position.x=data_out[0]/1000.0f;
+		msg.pose.position.y=data_out[1]/1000.0f;
+		msg.pose.position.z=data_out[2]/1000.0f;
+		msg.pose.orientation.x=data_out[3]/1000.0f;
+		msg.pose.orientation.y=data_out[4]/1000.0f;
+		msg.pose.orientation.z=data_out[5]/1000.0f;
+		msg.pose.orientation.w=data_out[6]/1000.0f;
+		msg.header.stamp.sec=secs[0];
+		msg.header.stamp.nsec=secs[1];
+		pub.publish(msg);
 		ros::spinOnce();
 		loop_rate.sleep();
-		++count;
 	}
 	return 0;
 }

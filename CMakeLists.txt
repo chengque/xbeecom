@@ -165,3 +165,11 @@ include_directories(
 add_executable(xbee_com src/ftditools.cpp src/xbee_com.cpp)
 target_link_libraries(xbee_com ${catkin_LIBRARIES} ftd2xx)
 add_dependencies(xbee_com xbee_com_cpp)
+
+add_executable(xbee_receive src/ftditools.cpp src/xbee_receive.cpp)
+target_link_libraries(xbee_receive ${catkin_LIBRARIES} ftd2xx)
+add_dependencies(xbee_receive xbee_receive_cpp)
+
+add_executable(xbee_send src/ftditools.cpp src/xbee_send.cpp)
+target_link_libraries(xbee_send ${catkin_LIBRARIES} ftd2xx)
+add_dependencies(xbee_send xbee_send_cpp)

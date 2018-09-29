@@ -15,7 +15,7 @@ extern FT_HANDLE ftHandle;
 short open_ftdi(int, char*, int, int);
 void close_ftdi();
 short send_ftdi(const short *);
-short read_ftdi (short *, double*);
+short read_ftdi (short *);
 unsigned short crc_update (unsigned short, unsigned char);
 unsigned short crc16(void*, unsigned short);
 #endif

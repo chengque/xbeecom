@@ -79,7 +79,7 @@ void close_ftdi()
 }
 
 
-short read_ftdi (short * data_out, double* HL_Status)
+short read_ftdi (short * data_out)
 {
 	unsigned long ftStatus;
     int size = 0;
@@ -96,10 +96,10 @@ short read_ftdi (short * data_out, double* HL_Status)
 	unsigned short* crc = NULL;
 	short* data_ptr = NULL;
 	unsigned long RxBytes, BytesReceived;
-	static short data_out_store[] = {0,0,0,0,0,0,0,0};
+	static short data_out_store[] = {0,0,0,0,0,0,0,0,0,0,0};
     static short status_store[] = {0,0};
     //short send_size = 22;
-	short send_size = 10;
+	short send_size = 11;
     short data_new_flag = 1;
     short data_length=0;
     
@@ -109,7 +109,7 @@ short read_ftdi (short * data_out, double* HL_Status)
     static short starti=0;
     static short endi=0;
     
-    size = send_size*2+3+1+2+2+3;
+    size = send_size*2+3+3;
     
     data_length=getlength(starti,endi);
     
@@ -218,7 +218,7 @@ short read_ftdi (short * data_out, double* HL_Status)
                 j=j-RECBUFSIZE;
             }
         }
-		i=3+2;
+		i=3;
 		descriptor = recbuf[i];
 		i=i+1;
 		data_ptr = (short*) &(recbuf[i]);
@@ -227,15 +227,12 @@ short read_ftdi (short * data_out, double* HL_Status)
 
 		if (crc16(data_ptr, send_size*2) == *crc)
 		{
-            status_store[0] = *((short*) &recbuf[i-4]);
-            status_store[1] = *((short*) &recbuf[i-2]);
-            memcpy(data_out_store, data_ptr, sizeof(data_out_store));
+            memcpy(data_out, data_ptr, sizeof(data_out_store));
 		}
         starti=incindex(starti,size);
 	}
-	memcpy(data_out, data_out_store, sizeof(data_out_store));
-    HL_Status[0] = ((double) status_store[0])/1000.0;
-    HL_Status[1] = ((double) status_store[1])/1000.0;
+	
+
     
 //     FT_GetQueueStatus(ftHandle,(LPDWORD)&RxBytes);
 //     
