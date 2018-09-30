@@ -19,7 +19,7 @@ double getTime()
 
 
 int main(int argc, char **argv) {
-	ros::init(argc, argv, "xbee receiver");
+	ros::init(argc, argv, "xbee_receiver");
 	ros::NodeHandle n;
 	ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("/mavros/mocap/pose", 10);
 	ros::Publisher pubref = n.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
 		}*/
 		if(openFtdi<1)
 		{
-			openFtdi = open_ftdi(57600, "Quad_USB1", 5, 15);
+			openFtdi = open_ftdi(57600, "Aero0", 5, 15);
 		}
 		data_new_flag = read_ftdi (data_out);
 		memcpy(secs,&data_out[10],sizeof(secs));
@@ -71,11 +71,16 @@ int main(int argc, char **argv) {
 		msgref.pose.position.x=data_out[7]/1000.0f;
 		msgref.pose.position.y=data_out[8]/1000.0f;
 		msgref.pose.position.z=data_out[9]/1000.0f;
-		if(msgref.pose.position.z<-10)
+		std::cout<<data_out[0]<<"-"<<data_out[8]<<std::endl;
+		if(msgref.pose.position.z<-5)
 		{
 			msgref.pose.position.x=msg.pose.position.x;
 			msgref.pose.position.y=msg.pose.position.y;
-			msgref.pose.position.z=msg.pose.position.z-10;
+			msgref.pose.position.z=msg.pose.position.z-5;
+		}
+		if(msgref.pose.position.z>2)
+		{
+			msgref.pose.position.z=2;
 		}
 		pubref.publish(msgref);
 

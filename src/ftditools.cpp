@@ -99,7 +99,7 @@ short read_ftdi (short * data_out)
 	static short data_out_store[] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
     static short status_store[] = {0,0};
     //short send_size = 22;
-	short send_size = 11;
+	short send_size = 14;
     short data_new_flag = 1;
     short data_length=0;
     
