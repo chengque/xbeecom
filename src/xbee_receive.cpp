@@ -1,6 +1,6 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
- #include <geometry_msgs/PoseStamped.h> 
+#include <geometry_msgs/PoseStamped.h> 
 #include <sstream>
 #include "sys/time.h"
 #include <math.h>
@@ -21,12 +21,14 @@ double getTime()
 int main(int argc, char **argv) {
 	ros::init(argc, argv, "xbee receiver");
 	ros::NodeHandle n;
-	ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("/mocap/pose", 10);
-	ros::Rate loop_rate(50);
-	short data_out[11];
+	ros::Publisher pub = n.advertise<geometry_msgs::PoseStamped>("/mavros/mocap/pose", 10);
+	ros::Publisher pubref = n.advertise<geometry_msgs::PoseStamped>("/mavros/setpoint_position/local", 10);
+	ros::Rate loop_rate(30);
+	short data_out[14];
 	int secs[2];
 	int data_new_flag=0;
 	geometry_msgs::PoseStamped msg;
+	geometry_msgs::PoseStamped msgref;
 	double ltime,ntime;
 	ltime=getTime();
 	ntime=ltime;
@@ -55,7 +57,7 @@ int main(int argc, char **argv) {
 			openFtdi = open_ftdi(57600, "Quad_USB1", 5, 15);
 		}
 		data_new_flag = read_ftdi (data_out);
-		memcpy(secs,&data_out[7],sizeof(secs));
+		memcpy(secs,&data_out[10],sizeof(secs));
 		msg.pose.position.x=data_out[0]/1000.0f;
 		msg.pose.position.y=data_out[1]/1000.0f;
 		msg.pose.position.z=data_out[2]/1000.0f;
@@ -66,6 +68,17 @@ int main(int argc, char **argv) {
 		msg.header.stamp.sec=secs[0];
 		msg.header.stamp.nsec=secs[1];
 		pub.publish(msg);
+		msgref.pose.position.x=data_out[7]/1000.0f;
+		msgref.pose.position.y=data_out[8]/1000.0f;
+		msgref.pose.position.z=data_out[9]/1000.0f;
+		if(msgref.pose.position.z<-10)
+		{
+			msgref.pose.position.x=msg.pose.position.x;
+			msgref.pose.position.y=msg.pose.position.y;
+			msgref.pose.position.z=msg.pose.position.z-10;
+		}
+		pubref.publish(msgref);
+
 		ros::spinOnce();
 		loop_rate.sleep();
 	}

@@ -6,8 +6,8 @@
 
 #define PURGE_BUFFER 255
 
-#define TXCHANNELS 4
-#define RXCHANNELS 20
+#define TXCHANNELS 14
+#define RXCHANNELS 14
 
 extern int openFtdi;
 extern FT_HANDLE ftHandle;
