@@ -6,6 +6,8 @@
 #include <math.h>
 #include <stdio.h>
 #include "ftditools.h"
+#include "serial.h"
+
 
 
 double getTime()
@@ -26,6 +28,7 @@ int main(int argc, char **argv) {
 	ros::Rate loop_rate(30);
 	short data_out[14];
 	int secs[2];
+	int fd;
 	int data_new_flag=0;
 	geometry_msgs::PoseStamped msg;
 	geometry_msgs::PoseStamped msgref;
@@ -39,8 +42,10 @@ int main(int argc, char **argv) {
 	msg.layout.dim[1].size=1;
 	msg.layout.dim[2].size=1;
 	*/
-	openFtdi = open_ftdi(57600, "Aero0", 5, 15);
-	ROS_INFO("Open Ftdi: [%d]", openFtdi);
+	fd = serial_open_file("/dev/ttyUSB0", 57600);
+	ROS_INFO("Open Serial %d", fd);
+	//openFtdi = open_ftdi(57600, "Aero0", 5, 15);
+	//ROS_INFO("Open Ftdi: [%d]", openFtdi);
 	while (ros::ok()) {
 		ntime=getTime();
 		ltime=ntime;
@@ -51,12 +56,13 @@ int main(int argc, char **argv) {
 		for(int i=0;i<8;i++)
 		{
 			msg.data[i]=data_out[i]/512.0f;
-		}*/
+		}
 		if(openFtdi<1)
 		{
 			openFtdi = open_ftdi(57600, "Aero0", 5, 15);
-		}
-		data_new_flag = read_ftdi (data_out);
+		}*/
+		//data_new_flag = read_ftdi (data_out);
+		readmessage (fd, data_out);
 		memcpy(secs,&data_out[10],sizeof(secs));
 		msg.pose.position.x=data_out[0]/1000.0f;
 		msg.pose.position.y=data_out[1]/1000.0f;
