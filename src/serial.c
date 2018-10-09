@@ -581,6 +581,10 @@ short readmessage(int fd, short * data_out)
     
 
     BytesReceived = serial_receive(fd,data_buf,size*2);
+    if(BytesReceived<1)
+    {
+	return 0;
+    }
     {
         if(data_length+BytesReceived>RECBUFSIZE-1)
         {

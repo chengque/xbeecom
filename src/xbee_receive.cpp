@@ -8,7 +8,7 @@
 #include "ftditools.h"
 #include "serial.h"
 
-
+double inittime=0;
 
 double getTime()
 {
@@ -62,7 +62,11 @@ int main(int argc, char **argv) {
 			openFtdi = open_ftdi(57600, "Aero0", 5, 15);
 		}*/
 		//data_new_flag = read_ftdi (data_out);
-		readmessage (fd, data_out);
+		if(readmessage (fd, data_out)<1)
+		{
+			//ros::spinOnce();
+			loop_rate.sleep();
+		}
 		memcpy(secs,&data_out[10],sizeof(secs));
 		msg.pose.position.x=data_out[0]/1000.0f;
 		msg.pose.position.y=data_out[1]/1000.0f;
@@ -71,8 +75,12 @@ int main(int argc, char **argv) {
 		msg.pose.orientation.y=data_out[4]/1000.0f;
 		msg.pose.orientation.z=data_out[5]/1000.0f;
 		msg.pose.orientation.w=data_out[6]/1000.0f;
-		msg.header.stamp.sec=secs[0];
-		msg.header.stamp.nsec=secs[1];
+		if(inittime<1){
+			inittime=ros::Time::now().toSec()-secs[0]-secs[1]/1000000000.0f;
+		}
+		double t=(inittime+secs[0]+secs[1]/1000000000.0f);
+		msg.header.stamp.sec=(int)t;
+		msg.header.stamp.nsec=(int)((t-msg.header.stamp.sec)*1000000000);//secs[1];
 		pub.publish(msg);
 		msgref.pose.position.x=data_out[7]/1000.0f;
 		msgref.pose.position.y=data_out[8]/1000.0f;
