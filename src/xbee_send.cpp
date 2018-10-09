@@ -9,6 +9,8 @@
 #include "ftditools.h"
 
 geometry_msgs::Vector3 posref;
+int initsecs;
+
 
 void poseHandler(geometry_msgs::PoseStamped msg)
 {
@@ -26,7 +28,7 @@ void poseHandler(geometry_msgs::PoseStamped msg)
     data[9]=(short)(posref.z*1000);
     secs[0]=msg.header.stamp.sec;
     secs[1]=msg.header.stamp.nsec;
-    std::cout<<data[0]<<"--"<<data[8]<<"--"<<posref.y<<std::endl;
+    std::cout<<data[0]<<"--"<<data[8]<<"--"<<posref.y<<"--"<<secs[0]<<"--"<<secs[1]<<std::endl;
     memcpy(&data[10],secs,sizeof(secs));
 	if(openFtdi<1)
 	{
@@ -51,8 +53,10 @@ int main(int argc, char **argv) {
 	posref.z=-10;
 	posref.y=0;
 	posref.x=0;
+
+	initsecs = (int)(ros::Time::now().toSec());
 	ros::Subscriber sub = n.subscribe("/mocap/pose", 10, poseHandler);
-	ros::Subscriber subref = n.subscribe("/cmd/poseref", 10, poserefHandler);
+	ros::Subscriber subref = n.subscribe("/cmd/posref", 10, poserefHandler);
 	ros::spin();
 	return 0;
 }
